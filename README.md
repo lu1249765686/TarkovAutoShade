@@ -13,6 +13,28 @@ TarkovAutoShade 是一个运行在 Windows 上的本地 SDR 显示滤镜工具�
 - 支持手动分析、实时预览、全局快捷键切换和滤镜平滑过渡。
 - 可选读取显示器 DDC/CI 硬件亮度和对比度能力；不支持时不会伪装成可用功能。
 
+## 效果演示
+
+### 夜间与夜视仪场景
+
+以下图片按同一场景中的实际操作顺序排列，用于展示自动启动、夜视保护和滤镜更新的效果。
+
+#### 1. 夜间室内，滤镜关闭
+
+![夜间室内滤镜关闭](assets/showcase/night-interior-01-filter-off.png)
+
+#### 2. 生成截图后自动启动滤镜
+
+![夜间室内自动启动滤镜](assets/showcase/night-interior-02-auto-filter-enabled.png)
+
+#### 3. 滤镜开启时使用夜视仪
+
+![滤镜开启时使用夜视仪](assets/showcase/night-interior-03-night-vision-enabled.png)
+
+#### 4. 夜视仪开启时更新滤镜
+
+![夜视仪开启时更新滤镜](assets/showcase/night-interior-04-filter-updated-with-night-vision.png)
+
 ## 本地运行与隐私
 
 程序使用 Windows 本地能力完成以下工作：
