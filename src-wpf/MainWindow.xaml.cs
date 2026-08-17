@@ -1498,11 +1498,11 @@ namespace TarkovAutoShade
                 Owner = this,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Width = 460,
-                Height = 370,
+                Height = 340,
                 MinWidth = 460,
-                MinHeight = 370,
+                MinHeight = 340,
                 MaxWidth = 460,
-                MaxHeight = 370,
+                MaxHeight = 340,
                 ResizeMode = ResizeMode.NoResize,
                 ShowInTaskbar = false,
                 Background = (Brush)FindResource("CrtSurfaceBrush"),
@@ -1511,7 +1511,7 @@ namespace TarkovAutoShade
 
             var content = new Grid { Margin = new Thickness(24) };
             content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(42) });
-            content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(82) });
+            content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(64) });
             content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(32) });
             content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(34) });
             content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(34) });
