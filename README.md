@@ -205,4 +205,5 @@ build.ps1                 Release 构建脚本
 
 作者：`lub大萝卜`  
 B站主页：[lub大萝卜](https://space.bilibili.com/66741964)  
-爱发电主页：[lub大萝卜](https://afdian.com/a/lublub)
+爱发电主页：[lub大萝卜](https://afdian.com/a/lublub)  
+GitHub仓库：[TarkovAutoShade](https://github.com/lu1249765686/TarkovAutoShade)

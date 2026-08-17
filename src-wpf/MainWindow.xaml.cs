@@ -1498,11 +1498,11 @@ namespace TarkovAutoShade
                 Owner = this,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Width = 460,
-                Height = 340,
+                Height = 370,
                 MinWidth = 460,
-                MinHeight = 340,
+                MinHeight = 370,
                 MaxWidth = 460,
-                MaxHeight = 340,
+                MaxHeight = 370,
                 ResizeMode = ResizeMode.NoResize,
                 ShowInTaskbar = false,
                 Background = (Brush)FindResource("CrtSurfaceBrush"),
@@ -1513,6 +1513,7 @@ namespace TarkovAutoShade
             content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(42) });
             content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(82) });
             content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(32) });
+            content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(34) });
             content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(34) });
             content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(34) });
             content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
@@ -1593,6 +1594,33 @@ namespace TarkovAutoShade
             Grid.SetRow(afdian, 3);
             content.Children.Add(afdian);
 
+            var github = new TextBlock
+            {
+                Text = "GitHub仓库：TarkovAutoShade",
+                FontFamily = (System.Windows.Media.FontFamily)FindResource("FontMono"),
+                FontSize = 12,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = (Brush)FindResource("TerminalGreenBrush"),
+                TextDecorations = TextDecorations.Underline,
+                Cursor = Cursors.Hand,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            github.MouseLeftButtonUp += delegate
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "https://github.com/lu1249765686/TarkovAutoShade",
+                        UseShellExecute = true
+                    });
+                }
+                catch { }
+            };
+            Grid.SetRow(github, 4);
+            content.Children.Add(github);
+
             var notice = new TextBlock
             {
                 Text = "本工具仅调整显示器 Gamma / DDC/CI，不读取游戏进程。",
@@ -1602,7 +1630,7 @@ namespace TarkovAutoShade
                 TextWrapping = TextWrapping.Wrap,
                 VerticalAlignment = VerticalAlignment.Center
             };
-            Grid.SetRow(notice, 4);
+            Grid.SetRow(notice, 5);
             content.Children.Add(notice);
 
             var close = new Button
@@ -1615,7 +1643,7 @@ namespace TarkovAutoShade
                 Style = (Style)FindResource("TacticalButton")
             };
             close.Click += delegate { about.Close(); };
-            Grid.SetRow(close, 5);
+            Grid.SetRow(close, 6);
             content.Children.Add(close);
 
             about.Content = content;
