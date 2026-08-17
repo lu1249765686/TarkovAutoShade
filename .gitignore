@@ -1,0 +1,10 @@
+# Build output and compiler caches
+/src-wpf/obj/
+/bin-wpf/
+
+# Local test output
+/test-results/
+/work/
+
+# Local editor/agent settings
+/.claude/

@@ -1,0 +1,810 @@
+<Window x:Class="TarkovAutoShade.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="TarkovAutoShade"
+        Width="1280" Height="820"
+        MinWidth="980" MinHeight="680"
+        Background="{StaticResource CrtBlackBrush}"
+        WindowStartupLocation="CenterScreen"
+        UseLayoutRounding="True"
+        TextOptions.TextFormattingMode="Display">
+
+    <Grid>
+        <!-- Scanline Overlay Effect -->
+        <Rectangle x:Name="ScanlineOverlay" IsHitTestVisible="False" Panel.ZIndex="9998" Opacity="0.3">
+            <Rectangle.Fill>
+                <DrawingBrush Viewport="0,0,1,4" ViewportUnits="Absolute" TileMode="Tile">
+                    <DrawingBrush.Drawing>
+                        <GeometryDrawing Brush="#15000000">
+                            <GeometryDrawing.Geometry>
+                                <RectangleGeometry Rect="0,2,1,2"/>
+                            </GeometryDrawing.Geometry>
+                        </GeometryDrawing>
+                    </DrawingBrush.Drawing>
+                </DrawingBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+
+        <!-- Main Layout Grid -->
+        <Grid Margin="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="420"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ==================== HEADER ZONE ==================== -->
+            <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                    Background="{StaticResource CrtSurfaceBrush}"
+                    BorderBrush="{StaticResource CrtBorderBrush}"
+                    BorderThickness="0,0,0,2"
+                    Padding="20,12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Title Row -->
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                            <TextBlock Text="///"
+                                      FontFamily="{StaticResource FontDisplay}"
+                                      FontSize="18"
+                                      FontWeight="ExtraBold"
+                                      Foreground="{StaticResource AmberAlertBrush}"
+                                      VerticalAlignment="Center"
+                                      Margin="0,0,16,0"/>
+                            <TextBlock Text="TARKOVAUTOSHADE"
+                                      FontFamily="{StaticResource FontDisplay}"
+                                      FontSize="24"
+                                      FontWeight="Black"
+                                      Foreground="{StaticResource PhosphorWhiteBrush}"
+                                      VerticalAlignment="Center"/>
+                            <Border Background="{StaticResource CrtBlackBrush}"
+                                   BorderBrush="{StaticResource TerminalGreenBrush}"
+                                   BorderThickness="1"
+                                   Padding="8,2"
+                                   Margin="16,0,0,0"
+                                   VerticalAlignment="Center">
+                                <TextBlock Text="v1.0.0"
+                                          FontFamily="{StaticResource FontMono}"
+                                          FontSize="11"
+                                          FontWeight="Bold"
+                                          Foreground="{StaticResource TerminalGreenBrush}"/>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <TextBlock Text="免费分享，禁止倒卖"
+                                       FontFamily="{StaticResource FontMono}"
+                                       FontSize="12"
+                                       Foreground="{StaticResource TerminalGreenBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,20,0"/>
+                            <Button x:Name="AboutButton"
+                                    Content="关于"
+                                    Width="56"
+                                    Height="30"
+                                    FontFamily="{StaticResource FontMono}"
+                                    FontSize="12"
+                                    Style="{StaticResource TacticalButton}"
+                                    Margin="0,0,16,0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Status Bar -->
+                    <Grid Grid.Row="1" Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0"
+                                BorderBrush="{StaticResource PhosphorDimBrush}"
+                                BorderThickness="1"
+                                Padding="8,4"
+                                Margin="0,0,24,0">
+                            <Grid Height="20" VerticalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="["
+                                          FontFamily="{StaticResource FontMono}"
+                                          FontSize="14"
+                                          Foreground="{StaticResource PhosphorDimBrush}"
+                                          VerticalAlignment="Center"
+                                          Margin="0,0,4,0"/>
+                                <Ellipse x:Name="StatusDot" Grid.Column="1"
+                                        Width="9" Height="9"
+                                        Fill="{StaticResource TerminalGreenBrush}"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,8,0"/>
+                                <TextBlock x:Name="RunStateText" Grid.Column="2" Text="未运行"
+                                          FontFamily="{StaticResource FontUi}"
+                                          FontSize="12"
+                                          FontWeight="Bold"
+                                          Foreground="{StaticResource TerminalGreenBrush}"
+                                          VerticalAlignment="Center"
+                                          Margin="0,0,4,0"/>
+                                <TextBlock Grid.Column="3" Text="]"
+                                          FontFamily="{StaticResource FontMono}"
+                                          FontSize="14"
+                                          Foreground="{StaticResource PhosphorDimBrush}"
+                                          VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="模式："
+                                      FontFamily="{StaticResource FontUi}"
+                                      FontSize="12"
+                                      Foreground="{StaticResource PhosphorDimBrush}"
+                                      Margin="0,0,10,0"
+                                      VerticalAlignment="Center"/>
+                            <TextBlock x:Name="ModeText"
+                                       Text="自动分析"
+                                      FontFamily="{StaticResource FontUi}"
+                                      FontSize="12"
+                                      FontWeight="Bold"
+                                       Foreground="{StaticResource AmberAlertBrush}"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <Border x:Name="ActionMessagePanel" Grid.Column="2"
+                                Visibility="Visible"
+                                Opacity="0"
+                                IsHitTestVisible="False"
+                                Background="{StaticResource CrtElevatedBrush}"
+                                BorderBrush="{StaticResource PhosphorDimBrush}"
+                                BorderThickness="1"
+                                Padding="10,5"
+                                Margin="24,0,0,0"
+                                MinHeight="32"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Ellipse x:Name="ActionMessageDot" Grid.Column="0"
+                                         Width="8" Height="8"
+                                         Fill="{StaticResource PhosphorDimBrush}"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,8,0"/>
+                                <TextBlock x:Name="ActionMessageTypeText" Grid.Column="1"
+                                           FontFamily="{StaticResource FontUi}"
+                                           FontSize="11"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource PhosphorWhiteBrush}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,8,0"/>
+                                <TextBlock x:Name="ActionMessageText" Grid.Column="2"
+                                           FontFamily="{StaticResource FontUi}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource PhosphorWhiteBrush}"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- ==================== LEFT CONTROL PANEL ==================== -->
+            <ScrollViewer Grid.Row="1" Grid.Column="0"
+                         Background="{StaticResource CrtSurfaceBrush}"
+                         VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Disabled">
+                <ScrollViewer.Resources>
+                    <Style TargetType="ScrollBar" BasedOn="{StaticResource TacticalScrollBar}"/>
+                </ScrollViewer.Resources>
+                <StackPanel Margin="24,24,10,24">
+
+                    <!-- System Status -->
+                    <Border Style="{StaticResource TacticalPanel}" Margin="0,0,0,16">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Width="3" Height="14"
+                                        Background="{StaticResource AmberAlertBrush}"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,10,0"/>
+                                 <TextBlock Text="系统状态" Style="{StaticResource SectionHeader}"/>
+                            </StackPanel>
+
+                            <StackPanel>
+                                <Border Background="{StaticResource CrtBlackBrush}"
+                                       BorderBrush="{StaticResource CrtBorderBrush}"
+                                       BorderThickness="1"
+                                       Padding="12,8"
+                                       Margin="0,0,0,8">
+                                    <Grid>
+                                        <TextBlock Text="目标显示器"
+                                                  Style="{StaticResource ParamLabel}"
+                                                  VerticalAlignment="Top"/>
+                                        <ComboBox x:Name="DisplayComboBox"
+                                                  Style="{StaticResource TacticalComboBox}"
+                                                  Height="34"
+                                                  Margin="0,18,0,0"/>
+                                    </Grid>
+                                </Border>
+
+                                <Border Background="{StaticResource CrtBlackBrush}"
+                                       BorderBrush="{StaticResource CrtBorderBrush}"
+                                       BorderThickness="1"
+                                       Padding="12,8"
+                                       Margin="0,0,0,8">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
+                                                  Text="截图目录"
+                                                  Style="{StaticResource ParamLabel}"
+                                                  VerticalAlignment="Top"/>
+                                        <TextBlock x:Name="FolderPath"
+                                                   Grid.Row="1" Grid.Column="0"
+                                                   Text="未找到截图目录"
+                                                  Style="{StaticResource ParamLabel}"
+                                                  Foreground="{StaticResource AmberAlertBrush}"
+                                                  TextWrapping="NoWrap"
+                                                  TextTrimming="CharacterEllipsis"
+                                                  VerticalAlignment="Center"
+                                                  Margin="0,10,8,0"/>
+                                        <Button x:Name="BrowseFolderButton"
+                                                Grid.Row="1" Grid.Column="1"
+                                                Content="选择目录"
+                                                Style="{StaticResource TacticalButtonPrimary}"
+                                                FontSize="11"
+                                                Height="32"
+                                                Width="82"
+                                                Margin="0,8,0,0"
+                                                ToolTip="自动查找失败时，手动选择 Escape from Tarkov 的 Screenshots 文件夹"/>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Tactical Controls -->
+                    <Border Style="{StaticResource TacticalPanel}" Margin="0,0,0,16">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Width="3" Height="14"
+                                        Background="{StaticResource AmberAlertBrush}"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,10,0"/>
+                                 <TextBlock Text="快速操作" Style="{StaticResource SectionHeader}"/>
+                            </StackPanel>
+
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Button Grid.Row="0" Grid.Column="0"
+                                       x:Name="AnalyzeButton"
+                                        Content="分析截图"
+                                       Style="{StaticResource TacticalButton}"
+                                       Margin="0,0,4,8"/>
+
+                                <Button Grid.Row="0" Grid.Column="1"
+                                       x:Name="ToggleButton"
+                                         Content="开启滤镜  F8"
+                                        Style="{StaticResource TacticalButtonPrimary}"
+                                       Margin="4,0,0,8"/>
+
+                                <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Height="32" Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="快捷键" Style="{StaticResource ParamLabel}" VerticalAlignment="Center"/>
+                                     <TextBlock x:Name="HotkeyText" Grid.Column="1" Text="F8" Style="{StaticResource ParamValue}" VerticalAlignment="Center" Margin="12,0,12,0"/>
+                                    <Button x:Name="ChangeHotkeyButton" Grid.Column="2" Content="设置" Width="56" Height="30" VerticalAlignment="Center" Style="{StaticResource TacticalButton}"/>
+                                </Grid>
+
+                                <CheckBox x:Name="SmoothTransitionCheckBox" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                          Content="滤镜平滑切换" Style="{StaticResource TacticalCheckBox}"
+                                          ToolTip="关闭后立即切换，开启后使用较短的平滑过渡。"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Game process focus watcher -->
+                    <Border x:Name="ProcessWatchPanel" Style="{StaticResource TacticalPanel}" Margin="0,0,0,16">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                <Border Width="3" Height="14"
+                                        Background="{StaticResource AmberAlertBrush}"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,10,0"/>
+                                <TextBlock Text="滤镜自动启停" Style="{StaticResource SectionHeader}"/>
+                            </StackPanel>
+                            <CheckBox x:Name="ProcessWatchCheckBox"
+                                      Content="切出游戏时自动关闭滤镜"
+                                      Style="{StaticResource TacticalCheckBox}"
+                                      Margin="0,0,0,10"/>
+                            <StackPanel x:Name="ProcessWatchControls">
+                                <Grid Margin="0,0,0,6">
+                                    <TextBlock Text="侦听进程" Style="{StaticResource ParamLabel}"
+                                               ToolTip="默认侦听 EscapeFromTarkov.exe，也可以从下拉框选择其他正在运行的进程。"/>
+                                    <TextBlock x:Name="ProcessWatchStatusText" Text="未启用"
+                                               Style="{StaticResource ParamValue}"/>
+                                </Grid>
+                                <ComboBox x:Name="ProcessComboBox"
+                                          Style="{StaticResource TacticalComboBox}"
+                                          Height="34"
+                                          ToolTip="选择需要侦听的游戏进程。"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Preset Configuration -->
+                    <Border Style="{StaticResource TacticalPanel}" Margin="0,0,0,16">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Width="3" Height="14"
+                                        Background="{StaticResource AmberAlertBrush}"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,10,0"/>
+                                 <TextBlock Text="快捷预设" Style="{StaticResource SectionHeader}"/>
+                            </StackPanel>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="96"/>
+                                </Grid.ColumnDefinitions>
+                                <ComboBox x:Name="PresetComboBox"
+                                          Style="{StaticResource TacticalComboBox}"
+                                          SelectedIndex="0"
+                                          Margin="0,0,8,0">
+                                    <ComboBoxItem Content="自动分析"/>
+                                    <ComboBoxItem Content="自然中性"/>
+                                    <ComboBoxItem Content="室内柔和"/>
+                                    <ComboBoxItem Content="夜视护眼"/>
+                                    <ComboBoxItem Content="高光保护"/>
+                                    <ComboBoxItem Content="自定义预设"/>
+                                </ComboBox>
+                                <Button x:Name="ResetDefaultsButton" Grid.Column="1"
+                                        Content="恢复默认数值" Style="{StaticResource TacticalButton}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Physical monitor controls -->
+                    <Border x:Name="MonitorHardwarePanel" Style="{StaticResource TacticalPanel}" Margin="0,0,0,16">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <Border Width="3" Height="14" Background="{StaticResource AmberAlertBrush}"
+                                        VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <TextBlock Text="显示器硬件" Style="{StaticResource SectionHeader}"/>
+                            </StackPanel>
+                            <TextBlock x:Name="MonitorHardwareDetail" Text="检测显示器 DDC/CI…"
+                                       Style="{StaticResource ParamLabel}" Foreground="{StaticResource PhosphorDimBrush}"
+                                       TextWrapping="Wrap" Margin="0,0,0,12"/>
+                            <Grid Margin="0,0,0,6">
+                                <TextBlock Text="显示器亮度" Style="{StaticResource ParamLabel}"
+                                           ToolTip="通过 DDC/CI 调整显示器硬件亮度。"/>
+                                <TextBlock x:Name="MonitorBrightnessValue" Text="--" Style="{StaticResource ParamValue}"/>
+                            </Grid>
+                            <Slider x:Name="MonitorBrightnessSlider" Style="{StaticResource TacticalSlider}"
+                                    Minimum="0" Maximum="100" IsEnabled="False" Margin="0,0,0,12"/>
+                            <Grid Margin="0,0,0,6">
+                                <TextBlock Text="显示器对比度" Style="{StaticResource ParamLabel}"
+                                           ToolTip="通过 DDC/CI 调整显示器硬件对比度。"/>
+                                <TextBlock x:Name="MonitorContrastValue" Text="--" Style="{StaticResource ParamValue}"/>
+                            </Grid>
+                            <Slider x:Name="MonitorContrastSlider" Style="{StaticResource TacticalSlider}"
+                                    Minimum="0" Maximum="100" IsEnabled="False"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Algorithm Parameters -->
+                    <Border Style="{StaticResource TacticalPanel}" Margin="0,0,0,16">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Width="3" Height="14"
+                                        Background="{StaticResource AmberAlertBrush}"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,10,0"/>
+                                 <TextBlock Text="算法参数" Style="{StaticResource SectionHeader}"/>
+                            </StackPanel>
+
+                            <!-- Shadow Visibility -->
+                            <StackPanel Margin="0,0,0,20">
+                                <Grid Margin="0,0,0,8">
+                                     <TextBlock Text="暗部可见度" Style="{StaticResource ParamLabel}"
+                                                ToolTip="提高暗部可见度，数值越高越容易看清阴影。"/>
+                                    <TextBlock x:Name="ShadowValue" Text="70" Style="{StaticResource ParamValue}"/>
+                                </Grid>
+                                <Slider x:Name="ShadowSlider"
+                                       Style="{StaticResource TacticalSlider}"
+                                       Minimum="0" Maximum="100" Value="70"
+                                       TickFrequency="1" IsSnapToTickEnabled="True"/>
+                            </StackPanel>
+
+                            <!-- Repeat similar pattern for other sliders... -->
+                            <!-- I'll create a few more key ones -->
+
+                            <!-- Highlight Protection -->
+                            <StackPanel Margin="0,0,0,20">
+                                <Grid Margin="0,0,0,8">
+                                     <TextBlock Text="高光保护" Style="{StaticResource ParamLabel}"
+                                                ToolTip="保护高亮区域，减少过曝和白色细节丢失。"/>
+                                    <TextBlock x:Name="HighlightValue" Text="76" Style="{StaticResource ParamValue}"/>
+                                </Grid>
+                                <Slider x:Name="HighlightSlider"
+                                       Style="{StaticResource TacticalSlider}"
+                                       Minimum="0" Maximum="100" Value="76"/>
+                            </StackPanel>
+
+                            <!-- Color Correction -->
+                            <StackPanel Margin="0,0,0,20">
+                                <Grid Margin="0,0,0,8">
+                                     <TextBlock Text="色偏校正" Style="{StaticResource ParamLabel}"
+                                                ToolTip="校正画面整体色偏。"/>
+                                    <TextBlock x:Name="ColorValue" Text="72" Style="{StaticResource ParamValue}"/>
+                                </Grid>
+                                <Slider x:Name="ColorSlider"
+                                       Style="{StaticResource TacticalSlider}"
+                                       Minimum="0" Maximum="100" Value="72"/>
+                            </StackPanel>
+
+                            <!-- Indoor Softness -->
+                            <StackPanel Margin="0,0,0,20">
+                                <Grid Margin="0,0,0,8">
+                                     <TextBlock Text="室内柔和" Style="{StaticResource ParamLabel}"
+                                                ToolTip="改善室内区域的明暗过渡。"/>
+                                    <TextBlock x:Name="IndoorValue" Text="72" Style="{StaticResource ParamValue}"/>
+                                </Grid>
+                                <Slider x:Name="IndoorSlider"
+                                       Style="{StaticResource TacticalSlider}"
+                                       Minimum="0" Maximum="100" Value="72"/>
+                            </StackPanel>
+
+                            <!-- Overexposure Guard -->
+                            <StackPanel Margin="0,0,0,20">
+                                <Grid Margin="0,0,0,8">
+                                     <TextBlock Text="过亮 / 夜视保护" Style="{StaticResource ParamLabel}"
+                                                ToolTip="针对夜视与过亮画面进行保护。"/>
+                                    <TextBlock x:Name="GuardValue" Text="88" Style="{StaticResource ParamValue}"/>
+                                </Grid>
+                                <Slider x:Name="GuardSlider"
+                                       Style="{StaticResource TacticalSlider}"
+                                       Minimum="0" Maximum="100" Value="88"/>
+                            </StackPanel>
+
+                            <!-- Black Level Degray -->
+                            <StackPanel Margin="0,0,0,20">
+                                <Grid Margin="0,0,0,8">
+                                     <TextBlock Text="黑位 / 去灰" Style="{StaticResource ParamLabel}"
+                                                ToolTip="调整黑位，减少灰雾感。"/>
+                                    <TextBlock x:Name="BlackValue" Text="56" Style="{StaticResource ParamValue}"/>
+                                </Grid>
+                                <Slider x:Name="BlackSlider"
+                                       Style="{StaticResource TacticalSlider}"
+                                       Minimum="0" Maximum="100" Value="56"/>
+                            </StackPanel>
+
+                            <!-- Max Intensity -->
+                            <StackPanel Margin="0,0,0,20">
+                                <Grid Margin="0,0,0,8">
+                                     <TextBlock Text="最大调整强度" Style="{StaticResource ParamLabel}"
+                                                ToolTip="限制滤镜对原图的最大影响强度。"/>
+                                    <TextBlock x:Name="StrengthValue" Text="82" Style="{StaticResource ParamValue}"/>
+                                </Grid>
+                                <Slider x:Name="StrengthSlider"
+                                       Style="{StaticResource TacticalSlider}"
+                                       Minimum="0" Maximum="100" Value="82"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Manual Adjustments -->
+                    <Border Style="{StaticResource TacticalPanel}" Margin="0,0,0,16">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Width="3" Height="14"
+                                        Background="{StaticResource AmberAlertBrush}"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,10,0"/>
+                                 <TextBlock Text="画面微调" Style="{StaticResource SectionHeader}"/>
+                            </StackPanel>
+
+                            <!-- Exposure Offset -->
+                            <StackPanel Margin="0,0,0,16">
+                                <Grid Margin="0,0,0,8">
+                                     <TextBlock Text="亮度微调" Style="{StaticResource ParamLabel}"
+                                                ToolTip="在自动分析结果上增加或降低整体亮度。"/>
+                                    <TextBlock x:Name="ExposureValue" Text="0" Style="{StaticResource ParamValue}"/>
+                                </Grid>
+                                <Slider x:Name="ExposureSlider"
+                                       Style="{StaticResource TacticalSlider}"
+                                       Minimum="-20" Maximum="20" Value="0"/>
+                            </StackPanel>
+
+                            <!-- Contrast Offset -->
+                            <StackPanel Margin="0,0,0,16">
+                                <Grid Margin="0,0,0,8">
+                                     <TextBlock Text="对比度微调" Style="{StaticResource ParamLabel}"
+                                                ToolTip="在自动分析结果上微调画面对比度。"/>
+                                    <TextBlock x:Name="ContrastValue" Text="0" Style="{StaticResource ParamValue}"/>
+                                </Grid>
+                                <Slider x:Name="ContrastSlider"
+                                       Style="{StaticResource TacticalSlider}"
+                                       Minimum="-20" Maximum="20" Value="0"/>
+                            </StackPanel>
+
+                            <!-- Warmth Adjustment -->
+                            <StackPanel Margin="0,0,0,0">
+                                <Grid Margin="0,0,0,8">
+                                     <TextBlock Text="暖色舒适度" Style="{StaticResource ParamLabel}"
+                                                ToolTip="负值偏冷，正值偏暖。"/>
+                                    <TextBlock x:Name="WarmthValue" Text="0" Style="{StaticResource ParamValue}"/>
+                                </Grid>
+                                <Slider x:Name="WarmthSlider"
+                                       Style="{StaticResource TacticalSlider}"
+                                       Minimum="-20" Maximum="20" Value="0"/>
+                            </StackPanel>
+
+                            <!-- Saturation Bias -->
+                            <StackPanel Margin="0,16,0,0">
+                                <Grid Margin="0,0,0,8">
+                                     <TextBlock Text="色彩浓度" Style="{StaticResource ParamLabel}"
+                                                ToolTip="微调色彩饱和度，避免颜色过淡或过艳。"/>
+                                    <TextBlock x:Name="SaturationValue" Text="0" Style="{StaticResource ParamValue}"/>
+                                </Grid>
+                                <Slider x:Name="SaturationSlider"
+                                       Style="{StaticResource TacticalSlider}"
+                                       Minimum="-20" Maximum="20" Value="0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ==================== RIGHT PREVIEW ZONE ==================== -->
+            <Grid Grid.Row="1" Grid.Column="1" Background="{StaticResource CrtBlackBrush}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Preview Header -->
+                <Border Grid.Row="0"
+                       Background="{StaticResource CrtSurfaceBrush}"
+                       BorderBrush="{StaticResource CrtBorderBrush}"
+                       BorderThickness="2,0,0,2"
+                       Padding="20,12">
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="3" Height="16" Background="{StaticResource AmberAlertBrush}"
+                                VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Text="滤镜预览"
+                                   FontFamily="{StaticResource FontUi}"
+                                   FontSize="13"
+                                   FontWeight="Black"
+                                   Foreground="{StaticResource PhosphorWhiteBrush}"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="拖动中线比较原图与滤镜效果"
+                                   FontFamily="{StaticResource FontUi}"
+                                   FontSize="9"
+                                   Foreground="{StaticResource PhosphorDimBrush}"
+                                   VerticalAlignment="Center"
+                                   Margin="14,1,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Preview Content -->
+                <Grid Grid.Row="1" Margin="16,14">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="2*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Preview Frame -->
+                    <Border Grid.Row="0"
+                           x:Name="PreviewBorder"
+                           Background="{StaticResource CrtSurfaceBrush}"
+                           BorderBrush="{StaticResource CrtBorderBrush}"
+                           BorderThickness="2"
+                           Margin="0,0,0,14">
+                        <Grid x:Name="PreviewContainer">
+                            <!-- Preview control will be added here in code-behind -->
+                            <Grid x:Name="PreviewEmptyState">
+                                <Grid.Background>
+                                    <DrawingBrush Viewport="0,0,120,64"
+                                                  ViewportUnits="Absolute"
+                                                  TileMode="Tile">
+                                        <DrawingBrush.Drawing>
+                                            <DrawingGroup>
+                                            <GeometryDrawing Brush="{StaticResource CrtBlackBrush}">
+                                                <GeometryDrawing.Geometry>
+                                                    <RectangleGeometry Rect="0,0,120,64"/>
+                                                </GeometryDrawing.Geometry>
+                                            </GeometryDrawing>
+                                            <GeometryDrawing>
+                                                <GeometryDrawing.Pen>
+                                                    <Pen Brush="{StaticResource CrtBorderBrush}" Thickness="1"/>
+                                                </GeometryDrawing.Pen>
+                                                <GeometryDrawing.Geometry>
+                                                    <GeometryGroup>
+                                                        <LineGeometry StartPoint="0,0" EndPoint="120,0"/>
+                                                        <LineGeometry StartPoint="0,32" EndPoint="120,32"/>
+                                                        <LineGeometry StartPoint="0,0" EndPoint="0,64"/>
+                                                        <LineGeometry StartPoint="60,0" EndPoint="60,64"/>
+                                                    </GeometryGroup>
+                                                </GeometryDrawing.Geometry>
+                                            </GeometryDrawing>
+                                            </DrawingGroup>
+                                        </DrawingBrush.Drawing>
+                                    </DrawingBrush>
+                                </Grid.Background>
+                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            TextElement.FontFamily="{StaticResource FontUi}">
+                                    <Border Width="52" Height="2"
+                                            Background="{StaticResource AmberAlertBrush}"
+                                            HorizontalAlignment="Center"
+                                            Margin="0,0,0,12"/>
+                                    <TextBlock Text="等待截图"
+                                               FontSize="11"
+                                               Foreground="{StaticResource AmberAlertBrush}"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,0,0,6"/>
+                                    <TextBlock Text="等待游戏截图"
+                                               FontSize="24"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource PhosphorWhiteBrush}"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,0,0,10"/>
+                                    <TextBlock Text="点击“分析截图”生成预览与 Gamma 曲线。"
+                                               FontSize="12"
+                                               Foreground="{StaticResource PhosphorDimBrush}"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,0,0,14"/>
+                                    <Border BorderBrush="{StaticResource AmberDimBrush}"
+                                            BorderThickness="1"
+                                            Padding="12,5"
+                                            HorizontalAlignment="Center">
+                                        <TextBlock Text="状态：等待分析"
+                                                   FontFamily="{StaticResource FontMono}"
+                                                   FontSize="10"
+                                                   Foreground="{StaticResource TerminalGreenBrush}"/>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+
+                        </Grid>
+                    </Border>
+
+                    <!-- Brightness distribution is a compact readout below the preview. -->
+                    <Border Grid.Row="1"
+                           Background="{StaticResource CrtSurfaceBrush}"
+                           BorderBrush="{StaticResource CrtBorderBrush}"
+                           BorderThickness="2"
+                           Padding="14,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="96"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="亮度分布" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock Text="分析读数" FontFamily="{StaticResource FontUi}"
+                                           FontSize="9" Foreground="{StaticResource PhosphorDimBrush}"/>
+                            </StackPanel>
+                            <Grid Grid.Column="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="12,0">
+                                    <TextBlock Text="暗部 P10" Style="{StaticResource ParamLabel}"/>
+                                    <TextBlock x:Name="P10Value" Text="--" FontFamily="{StaticResource FontMono}" FontSize="16" FontWeight="ExtraBold" Foreground="{StaticResource TerminalGreenBrush}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="12,0">
+                                    <TextBlock Text="中间调 P50" Style="{StaticResource ParamLabel}"/>
+                                    <TextBlock x:Name="MedianValue" Text="--" FontFamily="{StaticResource FontMono}" FontSize="16" FontWeight="ExtraBold" Foreground="{StaticResource TerminalGreenBrush}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Margin="12,0">
+                                    <TextBlock Text="高光 P95" Style="{StaticResource ParamLabel}"/>
+                                    <TextBlock x:Name="P95Value" Text="--" FontFamily="{StaticResource FontMono}" FontSize="16" FontWeight="ExtraBold" Foreground="{StaticResource TerminalGreenBrush}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="3" Margin="12,0">
+                                    <TextBlock Text="动态范围" Style="{StaticResource ParamLabel}"/>
+                                    <TextBlock x:Name="DynamicRangeValue" Text="--" FontFamily="{StaticResource FontMono}" FontSize="16" FontWeight="ExtraBold" Foreground="{StaticResource AmberAlertBrush}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <!-- ==================== BOTTOM METRICS BAR ==================== -->
+            <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                   Background="{StaticResource CrtSurfaceBrush}"
+                   BorderBrush="{StaticResource AmberAlertBrush}"
+                   BorderThickness="0,2,0,0"
+                   Padding="24,12">
+                <Grid>
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel Margin="0,0,32,0">
+                            <TextBlock Text="等效 Gamma" Style="{StaticResource MetricLabel}"/>
+                            <TextBlock x:Name="GammaMetric" Text="1.45" Style="{StaticResource MetricValue}"/>
+                        </StackPanel>
+
+                        <TextBlock Text="|"
+                                  FontSize="20"
+                                  Foreground="{StaticResource CrtBorderBrush}"
+                                  VerticalAlignment="Center"
+                                  Margin="0,0,32,0"/>
+
+                        <StackPanel Margin="0,0,32,0">
+                            <TextBlock Text="亮度调整" Style="{StaticResource MetricLabel}"/>
+                            <TextBlock x:Name="BrightnessMetric" Text="+28" Style="{StaticResource MetricValue}"/>
+                        </StackPanel>
+
+                        <TextBlock Text="|"
+                                  FontSize="20"
+                                  Foreground="{StaticResource CrtBorderBrush}"
+                                  VerticalAlignment="Center"
+                                  Margin="0,0,32,0"/>
+
+                        <StackPanel>
+                            <TextBlock Text="对比度调整" Style="{StaticResource MetricLabel}"/>
+                            <TextBlock x:Name="ContrastMetric" Text="+12" Style="{StaticResource MetricValue}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock x:Name="TimestampText"
+                               HorizontalAlignment="Right"
+                               Text="2026.08.16 - 14:32:07"
+                               FontFamily="{StaticResource FontMono}"
+                               FontSize="12"
+                               FontWeight="Bold"
+                               Foreground="{StaticResource PhosphorDimBrush}"
+                               VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Amber Border Around Window -->
+        <Rectangle Stroke="{StaticResource AmberAlertBrush}"
+                  StrokeThickness="2"
+                  IsHitTestVisible="False"
+                  Panel.ZIndex="10000"/>
+    </Grid>
+</Window>

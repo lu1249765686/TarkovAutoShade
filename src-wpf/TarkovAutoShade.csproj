@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A2C5E63B-57C1-4B30-BD7C-6D53B4D0B9F5}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>TarkovAutoShade</RootNamespace>
+    <AssemblyName>TarkovAutoShade</AssemblyName>
+    <!-- Prefer 4.8 when its developer pack is installed; the checked-in
+         fallback keeps this project buildable with the available 4.7.1 pack. -->
+    <TargetFrameworkVersion Condition="Exists('C:/Program Files (x86)/Reference Assemblies/Microsoft/Framework/.NETFramework/v4.8')">v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">v4.7.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ApplicationIcon>../assets/TarkovAutoShade.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>latest</LangVersion>
+    <Version>1.0.0</Version>
+    <Authors>lub大萝卜</Authors>
+    <Company>TarkovAutoShade</Company>
+    <Product>TarkovAutoShade</Product>
+    <Copyright>Copyright © 2026 - 免费分享，禁止倒卖</Copyright>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin/Debug/</OutputPath>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin/Release/</OutputPath>
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml" />
+    <Page Include="MainWindow.xaml" />
+    <Page Include="Styles/TacticalStyles.xaml" />
+    <None Include="app.manifest" />
+    <Compile Include="App.xaml.cs" />
+    <Compile Include="GlobalHotkey.cs" />
+    <Compile Include="MainWindow.xaml.cs" />
+    <Compile Include="PreviewControl.cs" />
+    <Compile Include="Properties/AssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="../src/ImageAnalyzer.cs">
+      <Link>Core/ImageAnalyzer.cs</Link>
+    </Compile>
+    <Compile Include="../src/GammaRampController.cs">
+      <Link>Core/GammaRampController.cs</Link>
+    </Compile>
+    <Compile Include="../src/ScreenshotWatcher.cs">
+      <Link>Core/ScreenshotWatcher.cs</Link>
+    </Compile>
+    <Compile Include="../src/ToneCurve.cs">
+      <Link>Core/ToneCurve.cs</Link>
+    </Compile>
+    <Compile Include="../src/Models.cs">
+      <Link>Core/Models.cs</Link>
+    </Compile>
+    <Compile Include="../src/RecoveryStore.cs">
+      <Link>Core/RecoveryStore.cs</Link>
+    </Compile>
+    <Compile Include="../src/ObsFilterStateStore.cs">
+      <Link>Core/ObsFilterStateStore.cs</Link>
+    </Compile>
+    <Compile Include="../src/ScreenshotFolderLocator.cs">
+      <Link>Core/ScreenshotFolderLocator.cs</Link>
+    </Compile>
+    <Compile Include="../src/DdcCiController.cs">
+      <Link>Core/DdcCiController.cs</Link>
+    </Compile>
+  </ItemGroup>
+
+  <Import Project="$(MSBuildToolsPath)/Microsoft.CSharp.targets" />
+</Project>
