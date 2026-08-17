@@ -4,6 +4,8 @@ TarkovAutoShade 是一个运行在 Windows 上的本地 SDR 显示滤镜工具�
 
 本项目通过 Vibe Coding 方式完成。
 
+演示视频：[在 B 站观看 TarkovAutoShade 使用效果](https://www.bilibili.com/video/BV15ybv6wEK3/)
+
 ## 功能概览
 
 - 监听游戏截图目录，检测新截图后自动分析画面。
