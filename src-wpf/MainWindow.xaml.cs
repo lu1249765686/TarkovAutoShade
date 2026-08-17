@@ -1498,11 +1498,11 @@ namespace TarkovAutoShade
                 Owner = this,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Width = 460,
-                Height = 340,
+                Height = 330,
                 MinWidth = 460,
-                MinHeight = 340,
+                MinHeight = 330,
                 MaxWidth = 460,
-                MaxHeight = 340,
+                MaxHeight = 330,
                 ResizeMode = ResizeMode.NoResize,
                 ShowInTaskbar = false,
                 Background = (Brush)FindResource("CrtSurfaceBrush"),
@@ -1510,13 +1510,16 @@ namespace TarkovAutoShade
             };
 
             var content = new Grid { Margin = new Thickness(24) };
-            content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(42) });
-            content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(64) });
+            content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(40) });
+            content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(62) });
+            content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(28) });
+            content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(28) });
+            content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(28) });
             content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(32) });
-            content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(34) });
-            content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(34) });
-            content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(34) });
-            content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            content.RowDefinitions.Add(new RowDefinition {
+                Height = new GridLength(1, GridUnitType.Star),
+                MinHeight = 38
+            });
 
             var title = new TextBlock
             {
@@ -1535,7 +1538,7 @@ namespace TarkovAutoShade
                 FontFamily = (System.Windows.Media.FontFamily)FindResource("FontMono"),
                 FontSize = 12,
                 Foreground = (Brush)FindResource("PhosphorDimBrush"),
-                LineHeight = 21
+                LineHeight = 20
             };
             Grid.SetRow(details, 1);
             content.Children.Add(details);
