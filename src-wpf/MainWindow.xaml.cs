@@ -1509,7 +1509,10 @@ namespace TarkovAutoShade
                 Foreground = (Brush)FindResource("PhosphorWhiteBrush")
             };
 
-            var content = new Grid { Margin = new Thickness(24) };
+            var content = new Grid
+            {
+                Margin = new Thickness(24, 24, 24, 12)
+            };
             content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(40) });
             content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(62) });
             content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(28) });
@@ -1642,7 +1645,8 @@ namespace TarkovAutoShade
                 Width = 72,
                 Height = 32,
                 HorizontalAlignment = HorizontalAlignment.Right,
-                VerticalAlignment = VerticalAlignment.Bottom,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 1),
                 Style = (Style)FindResource("TacticalButton")
             };
             close.Click += delegate { about.Close(); };
