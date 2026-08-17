@@ -21,19 +21,19 @@ TarkovAutoShade 是一个运行在 Windows 上的本地 SDR 显示滤镜工具�
 
 #### 1. 夜间室内，滤镜关闭
 
-![夜间室内滤镜关闭](assets/showcase/night-interior-01-filter-off.png)
+![夜间室内滤镜关闭](assets/showcase/night-interior-01-filter-off.webp)
 
 #### 2. 生成截图后自动启动滤镜
 
-![夜间室内自动启动滤镜](assets/showcase/night-interior-02-auto-filter-enabled.png)
+![夜间室内自动启动滤镜](assets/showcase/night-interior-02-auto-filter-enabled.webp)
 
 #### 3. 滤镜开启时使用夜视仪
 
-![滤镜开启时使用夜视仪](assets/showcase/night-interior-03-night-vision-enabled.png)
+![滤镜开启时使用夜视仪](assets/showcase/night-interior-03-night-vision-enabled.webp)
 
 #### 4. 夜视仪开启时更新滤镜
 
-![夜视仪开启时更新滤镜](assets/showcase/night-interior-04-filter-updated-with-night-vision.png)
+![夜视仪开启时更新滤镜](assets/showcase/night-interior-04-filter-updated-with-night-vision.webp)
 
 ## 本地运行与隐私
 
