@@ -36,6 +36,7 @@ namespace TarkovAutoShade
         private AnalysisResult currentAnalysis;
         private string lastAnalyzedPath;
         private string displayDevice;
+        private readonly List<DisplayTarget> displayTargets = new List<DisplayTarget>();
         private int analysisVersion;
         private int previewVersion;
         private bool filterModeEnabled = true;
@@ -44,9 +45,17 @@ namespace TarkovAutoShade
         private bool trayExitRequested;
         private Window closeChoiceDialog;
         private bool updatingHardwareControls;
+        private bool updatingDisplaySelection;
+        private bool updatingDisplayList;
         private bool promotingCustomPreset;
         private bool processWasDetected;
         private bool autoPausedByProcess;
+        private bool processWatchUiInitialized;
+        private bool lastProcessWatchUiEnabled;
+        private bool lastProcessWatchUiActive;
+        private DateTime lastProcessWatchUiRefreshUtc;
+        private int processWatchEvaluationQueued;
+        private int monitorProbeVersion;
         private WinEventDelegate foregroundWindowEventHandler;
         private IntPtr foregroundWindowEventHook;
         private MonitorCapabilities monitorCapabilities = new MonitorCapabilities();
@@ -92,31 +101,205 @@ namespace TarkovAutoShade
 
         private void InitializeDisplay()
         {
-            var displays = GammaRampController.EnumerateDisplays();
-            DisplayTarget selected = null;
-            foreach (DisplayTarget display in displays)
+            RefreshDisplayList(false);
+        }
+
+        private void RefreshDisplayList(bool showNotification)
+        {
+            bool wasRunning = IsFilterRunning();
+            if (wasRunning)
             {
-                if (selected == null && display.Primary) selected = display;
-                if (string.Equals(display.DeviceName, settings.DisplayDevice,
-                    StringComparison.OrdinalIgnoreCase)) selected = display;
+                string restoreError;
+                gammaController.RestoreActive(out restoreError);
+                RecoveryStore.Clear();
             }
 
-            if (selected == null && displays.Count > 0) selected = displays[0];
-            if (selected == null)
+            updatingDisplayList = true;
+            try
+            {
+                var refreshedDisplays = GammaRampController.EnumerateDisplays();
+                displayTargets.Clear();
+                displayTargets.AddRange(refreshedDisplays);
+
+                DisplayTarget selected = null;
+                foreach (DisplayTarget display in displayTargets)
+                {
+                    if (selected == null && display.Primary) selected = display;
+                    if (string.Equals(display.DeviceName, displayDevice,
+                        StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(display.DeviceName, settings.DisplayDevice,
+                        StringComparison.OrdinalIgnoreCase)) selected = display;
+                }
+                if (selected == null && displayTargets.Count > 0)
+                    selected = displayTargets[0];
+
+                DisplayComboBox.Items.Clear();
+                if (selected == null)
+                {
+                    displayDevice = "";
+                    settings.DisplayDevice = "";
+                    DisplayComboBox.Items.Add("未检测到显示器");
+                    DisplayComboBox.SelectedIndex = 0;
+                }
+                else
+                {
+                    foreach (DisplayTarget display in displayTargets)
+                        DisplayComboBox.Items.Add(display);
+                    displayDevice = selected.DeviceName;
+                    settings.DisplayDevice = displayDevice;
+                    DisplayComboBox.SelectedItem = selected;
+                }
+
+                var availableDevices = new HashSet<string>(
+                    StringComparer.OrdinalIgnoreCase);
+                foreach (DisplayTarget display in displayTargets)
+                    availableDevices.Add(display.DeviceName);
+                var selectedDevices = new List<string>();
+                if (settings.SelectedDisplayDevices != null)
+                {
+                    foreach (string device in settings.SelectedDisplayDevices)
+                    {
+                        if (availableDevices.Contains(device) &&
+                            !selectedDevices.Contains(device))
+                            selectedDevices.Add(device);
+                    }
+                }
+                if (selectedDevices.Count == 0 && selected != null)
+                    selectedDevices.Add(selected.DeviceName);
+                settings.SelectedDisplayDevices = selectedDevices;
+
+                DisplayModeComboBox.SelectedIndex = settings.MultiDisplayMode ? 1 : 0;
+                BuildDisplaySelectionControls();
+                ApplyDisplayModeUi();
+                RefreshMonitorCapabilities();
+            }
+            finally
+            {
+                updatingDisplayList = false;
+            }
+
+            if (wasRunning && currentAnalysis != null && currentAnalysis.IsUsable)
+                ApplyRecommendation(currentAnalysis);
+            else
+                UpdateModeUi();
+            if (showNotification)
+                ShowNotification("显示器列表已更新", NotificationType.Info);
+            SaveSettings();
+        }
+
+        private void BuildDisplaySelectionControls()
+        {
+            if (DisplaySelectionPanel == null) return;
+            updatingDisplaySelection = true;
+            try
+            {
+                DisplaySelectionPanel.Children.Clear();
+                var selected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                if (settings.SelectedDisplayDevices != null)
+                {
+                    foreach (string device in settings.SelectedDisplayDevices)
+                        if (!string.IsNullOrWhiteSpace(device)) selected.Add(device);
+                }
+                if (selected.Count == 0 && !string.IsNullOrWhiteSpace(displayDevice))
+                    selected.Add(displayDevice);
+
+                bool anyChecked = false;
+                foreach (DisplayTarget display in displayTargets)
+                {
+                    var checkBox = new CheckBox
+                    {
+                        Content = display.ToString(),
+                        Tag = display.DeviceName,
+                        IsChecked = selected.Contains(display.DeviceName),
+                        Style = (Style)FindResource("TacticalCheckBox"),
+                        Margin = new Thickness(0, 0, 0, 6),
+                        ToolTip = "勾选后，多屏模式会将滤镜应用到此显示器。"
+                    };
+                    if (checkBox.IsChecked == true) anyChecked = true;
+                    checkBox.Checked += OnDisplaySelectionChanged;
+                    checkBox.Unchecked += OnDisplaySelectionChanged;
+                    DisplaySelectionPanel.Children.Add(checkBox);
+                }
+
+                if (!anyChecked && DisplaySelectionPanel.Children.Count > 0)
+                {
+                    var first = DisplaySelectionPanel.Children[0] as CheckBox;
+                    if (first != null) first.IsChecked = true;
+                }
+                SyncSelectedDisplaysFromUi();
+            }
+            finally
+            {
+                updatingDisplaySelection = false;
+            }
+        }
+
+        private void SyncSelectedDisplaysFromUi()
+        {
+            var selected = new List<string>();
+            if (DisplaySelectionPanel != null)
+            {
+                foreach (UIElement element in DisplaySelectionPanel.Children)
+                {
+                    var checkBox = element as CheckBox;
+                    string device = checkBox == null ? null : checkBox.Tag as string;
+                    if (checkBox != null && checkBox.IsChecked == true &&
+                        !string.IsNullOrWhiteSpace(device)) selected.Add(device);
+                }
+            }
+            settings.SelectedDisplayDevices = selected;
+        }
+
+        private List<string> GetTargetDisplayDevices()
+        {
+            if (!settings.MultiDisplayMode)
+            {
+                var single = new List<string>();
+                if (!string.IsNullOrWhiteSpace(displayDevice)) single.Add(displayDevice);
+                return single;
+            }
+            SyncSelectedDisplaysFromUi();
+            return new List<string>(settings.SelectedDisplayDevices);
+        }
+
+        private void ApplyDisplayModeUi()
+        {
+            bool multi = settings.MultiDisplayMode;
+            SingleDisplayPanel.Visibility = multi ? Visibility.Collapsed : Visibility.Visible;
+            MultiDisplayPanel.Visibility = multi ? Visibility.Visible : Visibility.Collapsed;
+            if (!multi) RebuildSingleDisplayComboBox();
+        }
+
+        private void RebuildSingleDisplayComboBox()
+        {
+            bool wasUpdating = updatingDisplayList;
+            updatingDisplayList = true;
+            try
             {
                 DisplayComboBox.Items.Clear();
-                DisplayComboBox.Items.Add("未检测到显示器");
-                DisplayComboBox.SelectedIndex = 0;
-                RefreshMonitorCapabilities();
-                return;
+                DisplayTarget selected = null;
+                foreach (DisplayTarget display in displayTargets)
+                {
+                    DisplayComboBox.Items.Add(display);
+                    if (string.Equals(display.DeviceName, displayDevice,
+                        StringComparison.OrdinalIgnoreCase)) selected = display;
+                }
+                if (selected == null && displayTargets.Count > 0)
+                    selected = displayTargets[0];
+                if (selected == null)
+                {
+                    DisplayComboBox.Items.Add("未检测到显示器");
+                    DisplayComboBox.SelectedIndex = 0;
+                }
+                else
+                {
+                    DisplayComboBox.SelectedItem = selected;
+                }
             }
-
-            DisplayComboBox.Items.Clear();
-            foreach (DisplayTarget display in displays) DisplayComboBox.Items.Add(display);
-            displayDevice = selected.DeviceName;
-            settings.DisplayDevice = displayDevice;
-            DisplayComboBox.SelectedItem = selected;
-            RefreshMonitorCapabilities();
+            finally
+            {
+                updatingDisplayList = wasUpdating;
+            }
         }
 
         private void ConfigureScreenshotFolder()
@@ -353,7 +536,17 @@ namespace TarkovAutoShade
             dialog.Content = root;
             dialog.Loaded += delegate { dialog.Focus(); };
 
-            if (dialog.ShowDialog() != true) return;
+            if (toggleHotkey != null) toggleHotkey.Suspend();
+            bool accepted = false;
+            try
+            {
+                accepted = dialog.ShowDialog() == true;
+            }
+            finally
+            {
+                if (!accepted && toggleHotkey != null) toggleHotkey.Resume();
+            }
+            if (!accepted) return;
             int previousKey = settings.HotkeyKeyCode;
             int previousModifiers = settings.HotkeyModifiers;
             settings.HotkeyKeyCode = capturedKey;
@@ -436,6 +629,7 @@ namespace TarkovAutoShade
                 previewRefreshTimer.Stop();
                 RefreshCurrentPreview();
             };
+
         }
 
         private void UpdateTimestamp(object sender, EventArgs e)
@@ -502,16 +696,41 @@ namespace TarkovAutoShade
         private void BindDisplayEvents()
         {
             DisplayComboBox.PreviewMouseLeftButtonDown += ForceOpenComboBox;
+            DisplayModeComboBox.PreviewMouseLeftButtonDown += ForceOpenComboBox;
             PresetComboBox.PreviewMouseLeftButtonDown += ForceOpenComboBox;
+            RefreshDisplayButton.Click += delegate { RefreshDisplayList(true); };
+            DisplayModeComboBox.SelectionChanged += delegate
+            {
+                if (initializing || updatingDisplayList ||
+                    DisplayModeComboBox.SelectedIndex < 0) return;
+                bool nextMulti = DisplayModeComboBox.SelectedIndex == 1;
+                if (settings.MultiDisplayMode == nextMulti) return;
+
+                bool wasRunning = IsFilterRunning();
+                string error;
+                gammaController.RestoreActive(out error);
+                RecoveryStore.Clear();
+                settings.MultiDisplayMode = nextMulti;
+                if (nextMulti) BuildDisplaySelectionControls();
+                ApplyDisplayModeUi();
+                RefreshMonitorCapabilities();
+                if (wasRunning && currentAnalysis != null && currentAnalysis.IsUsable)
+                    ApplyRecommendation(currentAnalysis);
+                else
+                    UpdateModeUi();
+                SaveSettings();
+                ShowNotification(nextMulti ? "已切换到多屏模式" : "已切换到单屏模式",
+                    NotificationType.Success);
+            };
             DisplayComboBox.SelectionChanged += delegate
             {
-                if (initializing) return;
+                if (initializing || updatingDisplayList) return;
                 var selected = DisplayComboBox.SelectedItem as DisplayTarget;
                 if (selected == null || string.IsNullOrWhiteSpace(selected.DeviceName)) return;
 
                 bool wasRunning = IsFilterRunning();
                 string error;
-                gammaController.RestoreAll(out error);
+                gammaController.RestoreActive(out error);
                 RecoveryStore.Clear();
                 displayDevice = selected.DeviceName;
                 settings.DisplayDevice = displayDevice;
@@ -528,10 +747,31 @@ namespace TarkovAutoShade
             {
                 if (!DisplayComboBox.IsDropDownOpen) e.Handled = true;
             };
+            DisplayModeComboBox.PreviewMouseWheel += delegate(object sender, MouseWheelEventArgs e)
+            {
+                if (!DisplayModeComboBox.IsDropDownOpen) e.Handled = true;
+            };
             PresetComboBox.PreviewMouseWheel += delegate(object sender, MouseWheelEventArgs e)
             {
                 if (!PresetComboBox.IsDropDownOpen) e.Handled = true;
             };
+        }
+
+        private void OnDisplaySelectionChanged(object sender, RoutedEventArgs e)
+        {
+            if (initializing || updatingDisplaySelection) return;
+            SyncSelectedDisplaysFromUi();
+            bool wasRunning = IsFilterRunning();
+            if (wasRunning)
+            {
+                string error;
+                gammaController.RestoreActive(out error);
+                RecoveryStore.Clear();
+                if (currentAnalysis != null && currentAnalysis.IsUsable)
+                    ApplyRecommendation(currentAnalysis);
+            }
+            SaveSettings();
+            if (!wasRunning) UpdateModeUi();
         }
 
         private static void ForceOpenComboBox(object sender, MouseButtonEventArgs e)
@@ -551,10 +791,14 @@ namespace TarkovAutoShade
             };
             ProcessWatchCheckBox.Checked += delegate
             {
+                bool wasRunning = IsFilterRunning();
                 settings.ProcessWatchEnabled = true;
                 settings.ProcessWatchConfigured = true;
-                processWasDetected = IsWatchedProcessActive();
+                bool detected = IsWatchedProcessActive();
+                processWasDetected = detected;
                 RefreshProcessList();
+                if (wasRunning && !detected)
+                    PauseFilterForProcess();
                 UpdateProcessWatchUi();
                 if (!initializing) SaveSettings();
             };
@@ -592,7 +836,7 @@ namespace TarkovAutoShade
                 0,
                 0,
                 WineventOutOfContext);
-            processWatchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
+            processWatchTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             processWatchTimer.Tick += delegate { EvaluateProcessWatch(); };
             processWatchTimer.Start();
         }
@@ -687,9 +931,10 @@ namespace TarkovAutoShade
         {
             if (!settings.ProcessWatchEnabled) return;
             bool detected = IsWatchedProcessActive();
-            if (processWasDetected && !detected && IsFilterRunning())
+            bool stateChanged = processWasDetected != detected;
+            if (stateChanged && processWasDetected && !detected && IsFilterRunning())
                 PauseFilterForProcess();
-            else if (!processWasDetected && detected && autoPausedByProcess)
+            else if (stateChanged && !processWasDetected && detected && autoPausedByProcess)
                 ResumeFilterForProcess();
             processWasDetected = detected;
             UpdateProcessWatchUi(detected);
@@ -705,11 +950,25 @@ namespace TarkovAutoShade
             uint eventTime)
         {
             if (closing || Dispatcher.HasShutdownStarted) return;
+            if (Interlocked.Exchange(ref processWatchEvaluationQueued, 1) != 0) return;
             try
             {
-                Dispatcher.BeginInvoke(new Action(EvaluateProcessWatch));
+                Dispatcher.BeginInvoke(new Action(delegate
+                {
+                    try
+                    {
+                        EvaluateProcessWatch();
+                    }
+                    finally
+                    {
+                        Interlocked.Exchange(ref processWatchEvaluationQueued, 0);
+                    }
+                }));
             }
-            catch { }
+            catch
+            {
+                Interlocked.Exchange(ref processWatchEvaluationQueued, 0);
+            }
         }
 
         private void PauseFilterForProcess()
@@ -750,28 +1009,80 @@ namespace TarkovAutoShade
         private void UpdateProcessWatchUi(bool active)
         {
             bool enabled = settings.ProcessWatchEnabled;
+            DateTime now = DateTime.UtcNow;
+            bool stateChanged = !processWatchUiInitialized ||
+                enabled != lastProcessWatchUiEnabled ||
+                active != lastProcessWatchUiActive;
+            bool refreshDue = (now - lastProcessWatchUiRefreshUtc).TotalSeconds >= 2.0;
+            if (!stateChanged && !refreshDue) return;
+
             ProcessWatchControls.IsEnabled = enabled;
             ProcessWatchControls.Opacity = enabled ? 1.0 : 0.45;
             if (!enabled)
             {
                 ProcessWatchStatusText.Text = "未启用";
-                return;
             }
-            ProcessWatchStatusText.Text = active ? "游戏前台" :
-                (IsWatchedProcessRunning() ? "进程后台运行" : "等待进程");
+            else
+            {
+                ProcessWatchStatusText.Text = active ? "游戏前台" :
+                    (IsWatchedProcessRunning() ? "进程后台运行" : "等待进程");
+            }
+            processWatchUiInitialized = true;
+            lastProcessWatchUiEnabled = enabled;
+            lastProcessWatchUiActive = active;
+            lastProcessWatchUiRefreshUtc = now;
         }
 
         private void RefreshMonitorCapabilities()
         {
-            if (string.IsNullOrWhiteSpace(displayDevice))
+            int probeVersion = Interlocked.Increment(ref monitorProbeVersion);
+            if (settings.MultiDisplayMode)
             {
-                monitorCapabilities = new MonitorCapabilities();
+                ApplyMonitorCapabilities(new MonitorCapabilities
+                {
+                    Detail = "多屏模式下请分别在各显示器上调整硬件亮度和对比度。"
+                });
+            }
+            else if (string.IsNullOrWhiteSpace(displayDevice))
+            {
+                ApplyMonitorCapabilities(new MonitorCapabilities());
             }
             else
             {
-                monitorCapabilities = ddcController.Probe(displayDevice);
+                string targetDevice = displayDevice;
+                ApplyMonitorCapabilities(new MonitorCapabilities
+                {
+                    Detail = "正在检测显示器 DDC/CI…"
+                });
+                Task.Factory.StartNew(delegate
+                {
+                    return ddcController.Probe(targetDevice);
+                }).ContinueWith(delegate(Task<MonitorCapabilities> task)
+                {
+                    if (closing || Dispatcher.HasShutdownStarted ||
+                        task.IsCanceled || task.IsFaulted ||
+                        probeVersion != monitorProbeVersion)
+                        return;
+                    try
+                    {
+                        Dispatcher.BeginInvoke(new Action(delegate
+                        {
+                            if (!closing && probeVersion == monitorProbeVersion &&
+                                !settings.MultiDisplayMode &&
+                                string.Equals(displayDevice, targetDevice,
+                                    StringComparison.OrdinalIgnoreCase))
+                                ApplyMonitorCapabilities(task.Result);
+                        }));
+                    }
+                    catch { }
+                });
+                return;
             }
+        }
 
+        private void ApplyMonitorCapabilities(MonitorCapabilities capabilities)
+        {
+            monitorCapabilities = capabilities ?? new MonitorCapabilities();
             updatingHardwareControls = true;
             try
             {
@@ -779,7 +1090,9 @@ namespace TarkovAutoShade
                     monitorCapabilities.ContrastSupported;
                 MonitorHardwarePanel.Opacity = supported ? 1.0 : 0.48;
                 MonitorHardwarePanel.ToolTip = supported ? null :
-                    "硬件无法使用：当前显示器未提供 DDC/CI 亮度或对比度控制。";
+                    (settings.MultiDisplayMode ?
+                        "多屏模式不提供统一的 DDC/CI 硬件控制。" :
+                        "硬件无法使用：当前显示器未提供 DDC/CI 亮度或对比度控制。");
                 MonitorHardwareDetail.Text = supported ? monitorCapabilities.Detail :
                     "硬件无法使用：" + monitorCapabilities.Detail;
                 ConfigureMonitorSlider(MonitorBrightnessSlider, MonitorBrightnessValue,
@@ -1173,25 +1486,32 @@ namespace TarkovAutoShade
                 ShowNotification("最大调整强度为 0，已保持原画", NotificationType.Warning);
                 return;
             }
-            if (string.IsNullOrWhiteSpace(displayDevice))
+            List<string> targetDevices = GetTargetDisplayDevices();
+            if (targetDevices.Count == 0)
             {
-                ShowNotification("没有可用的显示器", NotificationType.Error);
+                ShowNotification(settings.MultiDisplayMode ?
+                    "请至少勾选一个显示器" : "没有可用的显示器", NotificationType.Error);
                 return;
             }
 
             string error;
-            if (!gammaController.CaptureBaseline(displayDevice, out error))
+            if (!gammaController.CaptureBaselines(targetDevices, out error))
             {
                 ShowNotification("读取显示器原始曲线失败：" + error,
                     NotificationType.Error);
                 return;
             }
-            GammaRamp? baseline = gammaController.GetBaseline(displayDevice);
-            if (baseline.HasValue) RecoveryStore.Save(displayDevice, baseline.Value);
+            var baselineRamps = new Dictionary<string, GammaRamp>(StringComparer.OrdinalIgnoreCase);
+            foreach (string device in targetDevices)
+            {
+                GammaRamp? baseline = gammaController.GetBaseline(device);
+                if (baseline.HasValue) baselineRamps[device] = baseline.Value;
+            }
+            RecoveryStore.Save(baselineRamps);
 
             int duration = settings.SmoothTransition ?
                 280 + (int)Math.Round(recommendation.ChangeStrength * 120.0) : 0;
-            if (!gammaController.TransitionTo(displayDevice, recommendation,
+            if (!gammaController.TransitionTo(targetDevices, recommendation,
                 duration, out error))
             {
                 ShowNotification("应用滤镜失败：" + error,
@@ -1444,11 +1764,10 @@ namespace TarkovAutoShade
 
         private void RecoverPreviousSession()
         {
-            string deviceName;
-            GammaRamp ramp;
-            if (!RecoveryStore.TryLoad(out deviceName, out ramp)) return;
+            Dictionary<string, GammaRamp> ramps;
+            if (!RecoveryStore.TryLoadAll(out ramps)) return;
             string error;
-            if (gammaController.ApplyDirect(deviceName, ramp, out error))
+            if (gammaController.ApplyDirect(ramps, out error))
             {
                 RecoveryStore.Clear();
                 ShowNotification("已恢复上次异常退出前的画面", NotificationType.Success);
@@ -1537,7 +1856,7 @@ namespace TarkovAutoShade
 
             var details = new TextBlock
             {
-                Text = "版本：1.0.0\n作者：lub大萝卜\n免费分享，禁止倒卖",
+                Text = "版本：1.1.0\n作者：lub大萝卜\n免费分享，禁止倒卖",
                 FontFamily = (System.Windows.Media.FontFamily)FindResource("FontMono"),
                 FontSize = 12,
                 Foreground = (Brush)FindResource("PhosphorDimBrush"),

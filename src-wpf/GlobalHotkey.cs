@@ -92,6 +92,16 @@ namespace TarkovAutoShade
             return Register();
         }
 
+        public void Suspend()
+        {
+            UnregisterCurrent();
+        }
+
+        public bool Resume()
+        {
+            return Register();
+        }
+
         private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
             if (msg == WmHotkey && wParam.ToInt32() == hotkeyId)
