@@ -76,7 +76,7 @@
                                    Padding="8,2"
                                    Margin="16,0,0,0"
                                    VerticalAlignment="Center">
-                                <TextBlock Text="v1.0.0"
+                                <TextBlock Text="v1.1.0"
                                           FontFamily="{StaticResource FontMono}"
                                           FontSize="11"
                                           FontWeight="Bold"
@@ -230,10 +230,48 @@
 
                             <StackPanel>
                                 <Border Background="{StaticResource CrtBlackBrush}"
-                                       BorderBrush="{StaticResource CrtBorderBrush}"
-                                       BorderThickness="1"
-                                       Padding="12,8"
-                                       Margin="0,0,0,8">
+                                        BorderBrush="{StaticResource CrtBorderBrush}"
+                                        BorderThickness="1"
+                                        Padding="12,8"
+                                        Margin="0,0,0,8">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Text="显示器模式"
+                                                   Grid.Row="0"
+                                                   Style="{StaticResource ParamLabel}"
+                                                   VerticalAlignment="Top"/>
+                                        <Grid Grid.Row="1" Margin="0,18,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="100"/>
+                                            </Grid.ColumnDefinitions>
+                                            <ComboBox x:Name="DisplayModeComboBox"
+                                                      Grid.Column="0"
+                                                      Style="{StaticResource TacticalComboBox}"
+                                                      Height="34"
+                                                      Margin="0,0,8,0">
+                                                <ComboBoxItem Content="单屏模式"/>
+                                                <ComboBoxItem Content="多屏模式"/>
+                                            </ComboBox>
+                                            <Button x:Name="RefreshDisplayButton"
+                                                    Grid.Column="1"
+                                                    Content="刷新显示器"
+                                                    Style="{StaticResource TacticalButton}"
+                                                    Height="30"
+                                                    ToolTip="重新扫描当前连接的显示器。"/>
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+
+                                <Border x:Name="SingleDisplayPanel"
+                                        Background="{StaticResource CrtBlackBrush}"
+                                        BorderBrush="{StaticResource CrtBorderBrush}"
+                                        BorderThickness="1"
+                                        Padding="12,8"
+                                        Margin="0,0,0,8">
                                     <Grid>
                                         <TextBlock Text="目标显示器"
                                                   Style="{StaticResource ParamLabel}"
@@ -243,6 +281,26 @@
                                                   Height="34"
                                                   Margin="0,18,0,0"/>
                                     </Grid>
+                                </Border>
+
+                                <Border x:Name="MultiDisplayPanel"
+                                        Background="{StaticResource CrtBlackBrush}"
+                                        BorderBrush="{StaticResource CrtBorderBrush}"
+                                        BorderThickness="1"
+                                        Padding="12,8"
+                                        Margin="0,0,0,8"
+                                        Visibility="Collapsed">
+                                    <StackPanel>
+                                        <TextBlock Text="应用显示器（可多选）"
+                                                   Style="{StaticResource ParamLabel}"/>
+                                        <StackPanel x:Name="DisplaySelectionPanel"
+                                                    Margin="0,10,0,0"/>
+                                        <TextBlock Text="同一套滤镜会同步应用到勾选的显示器。"
+                                                   Style="{StaticResource ParamLabel}"
+                                                   Foreground="{StaticResource PhosphorDimBrush}"
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,4,0,0"/>
+                                    </StackPanel>
                                 </Border>
 
                                 <Border Background="{StaticResource CrtBlackBrush}"

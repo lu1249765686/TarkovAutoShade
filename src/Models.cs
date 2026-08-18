@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
@@ -38,6 +39,8 @@ namespace TarkovAutoShade
         [DataMember] public int CustomBlackPoint { get; set; }
         [DataMember] public int CustomSaturationBias { get; set; }
         [DataMember] public string DisplayDevice { get; set; }
+        [DataMember] public bool MultiDisplayMode { get; set; }
+        [DataMember] public List<string> SelectedDisplayDevices { get; set; }
         [DataMember] public bool SmoothTransition { get; set; }
         [DataMember] public bool ProcessWatchEnabled { get; set; }
         [DataMember] public bool ProcessWatchConfigured { get; set; }
@@ -78,6 +81,8 @@ namespace TarkovAutoShade
                 CustomBlackPoint = 56,
                 CustomSaturationBias = 0,
                 DisplayDevice = "",
+                MultiDisplayMode = false,
+                SelectedDisplayDevices = new List<string>(),
                 SmoothTransition = true,
                 ProcessWatchEnabled = false,
                 ProcessWatchConfigured = true,
@@ -176,6 +181,9 @@ namespace TarkovAutoShade
                 SmoothTransition = true;
             }
 
+            if (SelectedDisplayDevices == null)
+                SelectedDisplayDevices = new List<string>();
+
             ShadowTarget = MathUtil.Clamp(ShadowTarget, 0, 100);
             HighlightProtection = MathUtil.Clamp(HighlightProtection, 0, 100);
             ExposureBias = MathUtil.Clamp(ExposureBias, -20, 20);
@@ -202,6 +210,14 @@ namespace TarkovAutoShade
             CustomBlackPoint = MathUtil.Clamp(CustomBlackPoint, 0, 100);
             CustomSaturationBias = MathUtil.Clamp(CustomSaturationBias, -20, 20);
             if (DisplayDevice == null) DisplayDevice = "";
+            var normalizedDisplays = new List<string>();
+            foreach (string device in SelectedDisplayDevices)
+            {
+                if (!string.IsNullOrWhiteSpace(device) &&
+                    !normalizedDisplays.Contains(device))
+                    normalizedDisplays.Add(device);
+            }
+            SelectedDisplayDevices = normalizedDisplays;
             if (string.IsNullOrWhiteSpace(WatchedProcessName))
                 WatchedProcessName = "EscapeFromTarkov.exe";
             if (!ProcessWatchConfigured)
